@@ -5,8 +5,8 @@
   "description": "app to take attendence of students ",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "author": "Safeer",
   "license": "ISC",
