@@ -8,6 +8,6 @@ const router = Router();
 
 router.route('/registerStudent').post(registerStudent);
 router.route('/getAllStudents').get(getAllStudents);
-router.route('/getStudent').get(getStudent);
+router.route('/getStudent/:studentId').get(getStudent);
 
 export default router;
