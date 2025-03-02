@@ -3,6 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
+import studentRoutes from './routes/student.route.js';
 
 // Load environment variables
 dotenv.config();
@@ -16,10 +17,7 @@ const app = express();
 app.use(express.json()); // Parse JSON bodies
 app.use(cors()); // Enable CORS
 
-// Define a test route
-app.get('/', (req, res) => {
-  res.send('Attendance API is running...');
-});
+app.use('/students', studentRoutes);
 
 // Define the PORT
 const PORT = process.env.PORT || 7000;
