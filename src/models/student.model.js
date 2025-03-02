@@ -31,11 +31,6 @@ const studentSchema = new Schema(
       unique: true,
       sparse: true,
     },
-    zoomEmail: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
     batch: {
       type: String,
     },
