@@ -1,4 +1,5 @@
 import { ClassSession } from '../models/classSession.model.js';
+import { Instructor } from '../models/instructor.model.js';
 import mongoose from 'mongoose';
 
 //function to generate attendence link :
@@ -32,7 +33,9 @@ const createSession = async (req, res) => {
 
     //validating instructor id
 
-    if (!mongoose.Types.ObjectId.isValid(instructorId)) {
+    const instructor = await Instructor.findById(instructorId);
+
+    if (!instructor) {
       return res.status(400).json({
         success: false,
         message: 'Invalid instructorId.',
