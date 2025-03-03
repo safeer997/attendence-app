@@ -6,6 +6,7 @@ import connectDB from './config/db.js';
 //routes import
 import studentRoutes from './routes/student.route.js';
 import instructerRoutes from './routes/instructor.route.js';
+import classSessionRoutes from './routes/classSession.route.js';
 
 // Load environment variables
 dotenv.config();
@@ -16,12 +17,13 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(express.json()); // Parse JSON bodies
-app.use(cors()); // Enable CORS
+app.use(express.json()); 
+app.use(cors()); 
 
 //defining base routes
 app.use('/students', studentRoutes);
 app.use('/instructer', instructerRoutes);
+app.use('/classSession', classSessionRoutes);
 
 // Define the PORT
 const PORT = process.env.PORT || 7000;

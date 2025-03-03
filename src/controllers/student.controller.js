@@ -73,7 +73,7 @@ const getAllStudents = async (req, res) => {
   try {
     const students = await Student.find().select('-password');
     if (students.length === 0) {
-      res.status(400).json({
+     return res.status(400).json({
         success: false,
         message: 'no students record exist',
       });
