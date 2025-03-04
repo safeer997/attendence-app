@@ -14,12 +14,13 @@ const generateAttendanceLink = (topic, sessionDate) => {
 //--------------------------------------------------------------------------------------------------
 
 const createSession = async (req, res) => {
-  const { topic, instructorId, sessionDate } = req.body;
+  const { topic, instructorId, sessionDate, zoomMeetingId } = req.body;
   try {
-    if (!topic || !instructorId || !sessionDate) {
+    if (!topic || !instructorId || !sessionDate || zoomMeetingId) {
       return res.status(400).json({
         success: false,
-        message: 'topic , instructor id and session date is required !',
+        message:
+          'topic , instructor id , zoomMeetingId and session date is required !',
       });
     }
 
@@ -28,6 +29,13 @@ const createSession = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Topic must be a non-empty string.',
+      });
+    }
+
+    if (typeof zoomMeetingId !== 'string' || zoomMeetingId.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'zoom meeting id must be a non-empty string.',
       });
     }
 
@@ -60,6 +68,7 @@ const createSession = async (req, res) => {
       instructor: instructorId,
       sessionDate: sessionDate,
       attendanceLink: attendenceLink,
+      zoomMeetingId,
     });
 
     const createdSession = await ClassSession.findById(session._id).populate(

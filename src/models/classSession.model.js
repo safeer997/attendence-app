@@ -19,6 +19,9 @@ const classSessionSchema = new Schema(
     attendanceLink: {
       type: String,
     },
+    zoomMeetingId: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
