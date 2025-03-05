@@ -2,29 +2,24 @@ import { ClassSession } from '../models/classSession.model.js';
 import { Instructor } from '../models/instructor.model.js';
 import markAbsentStudents from '../services/update.attendence.js';
 
-//function to generate attendence link :
-const generateAttendanceLink = (topic, sessionDate) => {
-  const formattedDate = new Date(sessionDate).toISOString().split('T')[0]; // YYYY-MM-DD
-  const formattedTopic = topic.replace(/\s+/g, '-'); // Replace spaces with dashes
-  const randomString = Math.random().toString(36).substring(2, 8); // Generate random string
-
-  return `https://yourapp.com/attendance/${formattedDate}-${formattedTopic}-${randomString}`;
+// Function to generate attendance link
+const generateAttendanceLink = (sessionId) => {
+  return `https://yourapp.com/attendance/${sessionId}`;
 };
 
 //--------------------------------------------------------------------------------------------------
 
 const createSession = async (req, res) => {
-  const { topic, instructorId, sessionDate, zoomMeetingId } = req.body;
+  const { topic, instructorId, sessionDate } = req.body;
   try {
-    if (!topic || !instructorId || !sessionDate || zoomMeetingId) {
+    if (!topic || !instructorId || !sessionDate) {
       return res.status(400).json({
         success: false,
-        message:
-          'topic , instructor id , zoomMeetingId and session date is required !',
+        message: 'topic , instructor id ,session date is required !',
       });
     }
 
-    //validating topic
+    // Validating topic
     if (typeof topic !== 'string' || topic.trim() === '') {
       return res.status(400).json({
         success: false,
@@ -32,17 +27,8 @@ const createSession = async (req, res) => {
       });
     }
 
-    if (typeof zoomMeetingId !== 'string' || zoomMeetingId.trim() === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'zoom meeting id must be a non-empty string.',
-      });
-    }
-
-    //validating instructor id
-
+    // Validating instructor ID
     const instructor = await Instructor.findById(instructorId);
-
     if (!instructor) {
       return res.status(400).json({
         success: false,
@@ -50,7 +36,7 @@ const createSession = async (req, res) => {
       });
     }
 
-    //validating date
+    // Validating date
     const date = new Date(sessionDate);
     if (isNaN(date.getTime())) {
       return res.status(400).json({
@@ -59,18 +45,21 @@ const createSession = async (req, res) => {
       });
     }
 
-    //attendence link
-
-    const attendenceLink = generateAttendanceLink(topic, sessionDate);
-
+    // Creating session (without attendance link first)
     const session = await ClassSession.create({
       topic,
       instructor: instructorId,
       sessionDate: sessionDate,
-      attendanceLink: attendenceLink,
-      zoomMeetingId,
     });
 
+    // Generating attendance link
+    const attendanceLink = generateAttendanceLink(session._id);
+
+    // Updating session with the attendance link
+    session.attendanceLink = attendanceLink;
+    await session.save();
+
+    // Fetching the created session with instructor details
     const createdSession = await ClassSession.findById(session._id).populate(
       'instructor'
     );
@@ -78,11 +67,11 @@ const createSession = async (req, res) => {
     if (!createdSession) {
       return res.status(500).json({
         success: false,
-        message: 'error creating session in database',
+        message: 'Error creating session in database',
       });
     }
 
-    //run automated attendence marking function .
+    // Run automated attendance marking function
     setTimeout(() => {
       markAbsentStudents(session._id);
     }, 60 * 60 * 1000);
@@ -91,48 +80,44 @@ const createSession = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'class session successfully created',
+      message: 'Class session successfully created',
       data: createdSession,
     });
   } catch (error) {
     console.log('Error :', error);
     res.status(500).json({
       success: false,
-      message: 'something went wrong',
+      message: 'Something went wrong',
     });
   }
 };
 
-//  GET ALL SESSIONS
-
+// GET ALL SESSIONS
 const getAllSessions = async (req, res) => {
   try {
     const sessions = await ClassSession.find().populate('instructor');
     if (sessions.length === 0) {
-      {
-        return res.status(400).json({
-          success: false,
-          message: 'no session record exists',
-        });
-      }
+      return res.status(400).json({
+        success: false,
+        message: 'No session record exists',
+      });
     }
 
     return res.status(201).json({
       success: true,
-      message: 'class sessions data fetched successfully',
+      message: 'Class sessions data fetched successfully',
       data: sessions,
     });
   } catch (error) {
     console.log('Error :', error);
     res.status(500).json({
       success: false,
-      message: 'something went wrong',
+      message: 'Something went wrong',
     });
   }
 };
 
-// GET A INDIVIVDUAL SESSION
-
+// GET AN INDIVIDUAL SESSION
 const getSession = async (req, res) => {
   const { sessionId } = req.params;
   try {
@@ -142,20 +127,20 @@ const getSession = async (req, res) => {
     if (!session) {
       return res.status(404).json({
         success: false,
-        message: 'session not found',
+        message: 'Session not found',
       });
     }
 
     return res.status(201).json({
       success: true,
-      message: 'session data fetched successfully',
+      message: 'Session data fetched successfully',
       data: session,
     });
   } catch (error) {
     console.log('Error :', error);
     res.status(500).json({
       success: false,
-      message: 'something went wrong',
+      message: 'Something went wrong',
     });
   }
 };
