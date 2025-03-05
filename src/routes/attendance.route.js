@@ -3,6 +3,6 @@ import { markAttendance } from '../controllers/attendence.controller.js';
 
 const router = Router();
 
-router.route('/getAttendance').get(markAttendance);
+router.route('/:sessionId').get(markAttendance);
 
 export default router;
