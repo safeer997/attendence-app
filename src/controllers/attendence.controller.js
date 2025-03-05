@@ -1,23 +1,24 @@
-import { Attendance } from '../models/attendence.model.js';
+import { Attendance } from '../models/attendance.model.js';
 import { ClassSession } from '../models/classSession.model.js';
 import { Student } from '../models/student.model.js';
 
-const markAttendence = async (req, res) => {
+const markAttendance = async (req, res) => {
   const { sessionId, phoneNumber } = req.body;
   const studentIp = req.ip;
 
   //validate session id
-  if (sessionId.trim() === '') {
+  if (!sessionId?.trim()) {
     return res.status(400).json({
       success: false,
       message: 'session id is required',
     });
   }
 
-  if (phoneNumber.trim() === '') {
+  //validate phone number
+  if (!phoneNumber?.trim()) {
     return res.status(400).json({
       success: false,
-      message: 'phone number is required for marking the attendence',
+      message: 'phone number is required for marking the attendance',
     });
   }
 
@@ -32,8 +33,7 @@ const markAttendence = async (req, res) => {
     }
 
     //checking student
-
-    const student = await Student.findOne({ phoneNumber: phoneNumber });
+    const student = await Student.findOne({ phoneNumber });
 
     if (!student) {
       return res.status(400).json({
@@ -42,36 +42,83 @@ const markAttendence = async (req, res) => {
       });
     }
 
-    //checking attendence if already marked
-
-    const attendance = await Attendance.findOne({
+    //checking attendance if already marked
+    const attendanceExists = await Attendance.findOne({
       student: student._id,
       classSession: session._id,
     });
 
-    if (attendance) {
+    if (attendanceExists) {
       return res.status(400).json({
         success: false,
         message: 'Attendance already marked for this session',
       });
     }
 
-    //marking attendence
+    //marking attendance for offline and online students
 
-    let status = 'absent';
+    //1 for offline students
+    const accioCenterIpAddress = process.env.ACCIO_IP;
 
-     //matching ip of accio with student ip later we will put this into env file
-    if (studentIp === 'AccioIp') {
-      status = 'offline';
+    if (studentIp === accioCenterIpAddress) {
+      //mark attendance
+      const attendance = await Attendance.create({
+        student: student._id,
+        classSession: session._id,
+        status: 'offline',
+      });
+
+      if (!attendance) {
+        return res.status(500).json({
+          success: false,
+          message: 'error in marking attendance in mongo db',
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Attendance marked successfully for student',
+        data: student,
+      });
     }
 
-    
+    //2 checking online students and marking their attendance
+    const onlineStudent = session.onlineStudents?.find(
+      (s) => s.phoneNumber === phoneNumber
+    );
 
-    
+    if (!onlineStudent) {
+      return res.status(400).json({
+        success: false,
+        message: 'student was not present online for this session',
+      });
+    }
+
+    const attendance = await Attendance.create({
+      student: student._id,
+      classSession: session._id,
+      status: 'online',
+    });
+
+    if (!attendance) {
+      return res.status(500).json({
+        success: false,
+        message: 'error in marking online attendance in mongo db',
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Attendance marked successfully for online present student',
+      data: student,
+    });
   } catch (error) {
+    console.error('Error marking attendance:', error);
     res.status(500).json({
       success: false,
       message: 'something went wrong',
     });
   }
 };
+
+export { markAttendance };
