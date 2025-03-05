@@ -1,5 +1,4 @@
 import { Attendance } from '../models/attendance.model.js';
-import { ClassSession } from '../models/classSession.model.js';
 import { Student } from '../models/student.model.js';
 
 export const markAbsentStudents = async (sessionId) => {
@@ -42,3 +41,5 @@ export const markAbsentStudents = async (sessionId) => {
     );
   }
 };
+
+export default markAbsentStudents;

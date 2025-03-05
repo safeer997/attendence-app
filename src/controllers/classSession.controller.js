@@ -1,6 +1,6 @@
 import { ClassSession } from '../models/classSession.model.js';
 import { Instructor } from '../models/instructor.model.js';
-import mongoose from 'mongoose';
+import markAbsentStudents from '../services/update.attendence.js';
 
 //function to generate attendence link :
 const generateAttendanceLink = (topic, sessionDate) => {
@@ -81,6 +81,13 @@ const createSession = async (req, res) => {
         message: 'error creating session in database',
       });
     }
+
+    //run automated attendence marking function .
+    setTimeout(() => {
+      markAbsentStudents(session._id);
+    }, 60 * 60 * 1000);
+
+    //--------------------------------------------------------
 
     return res.status(201).json({
       success: true,

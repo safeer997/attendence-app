@@ -26,11 +26,11 @@ const studentSchema = new Schema(
       type: String,
       required: true,
     },
-    macAddress: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
+    // macAddress: {
+    //   type: String,
+    //   unique: true,
+    //   sparse: true,
+    // },
     batch: {
       type: String,
     },
