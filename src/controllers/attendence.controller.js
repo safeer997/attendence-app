@@ -1,4 +1,4 @@
-import { Attendance } from '../models/attendance.model.js';
+import { Attendance } from '../models/attendence.model.js';
 import { ClassSession } from '../models/classSession.model.js';
 import { Student } from '../models/student.model.js';
 
