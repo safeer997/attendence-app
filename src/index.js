@@ -3,6 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
+import cookieParser from 'cookie-parser';
 //routes import
 import studentRoutes from './routes/student.route.js';
 import instructerRoutes from './routes/instructor.route.js';
@@ -19,7 +20,14 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: '*', // Allows all origins
+    credentials: true, // Allows cookies to be sent
+  })
+);
+
+app.use(cookieParser());
 
 //defining base routes
 app.use('/students', studentRoutes);
