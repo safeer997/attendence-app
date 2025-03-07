@@ -3,8 +3,9 @@ import { ClassSession } from '../models/classSession.model.js';
 import { Student } from '../models/student.model.js';
 
 const markAttendance = async (req, res) => {
-  const { sessionId, phoneNumber } = req.body;
+  const { phoneNumber } = req.body;
   const studentIp = req.ip;
+  const sessionId = req.params;
 
   //validate session id
   if (!sessionId?.trim()) {
